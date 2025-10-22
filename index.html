@@ -4,10 +4,28 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>calculadora-imc</title>
+    <title>Calculadora IMC</title>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'theme-light-green': '#C8D197', // Cor da paleta 
+              'theme-gold': '#D89845',        // Cor da paleta 
+              'theme-orange': '#C54B2C',      // Cor da paleta 
+              'theme-dark': '#473430',        // Cor da paleta 
+              'theme-teal': '#11BAAC',        // Cor da paleta 
+            },
+          },
+        },
+      };
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
   </head>
   <body>
-    <body class="bg-slate-900 bg-gradient-to-br from-slate-900 to-gray-800"></body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

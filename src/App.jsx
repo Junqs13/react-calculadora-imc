@@ -2,6 +2,13 @@
 
 import { useState, useMemo } from 'react';
 
+// Paleta de cores (definida no index.html):
+// 'theme-light-green': '#C8D197'
+// 'theme-gold': '#D89845'
+// 'theme-orange': '#C54B2C'
+// 'theme-dark': '#473430'
+// 'theme-teal': '#11BAAC'
+
 const textData = {
   pt: {
     title: 'Calculadora de IMC',
@@ -11,7 +18,7 @@ const textData = {
     metric: 'Métrico',
     imperial: 'Imperial',
     language: 'Idioma',
-    resultTitle: 'Seu Resultado:',
+    resultTitle: 'Seu Resultado',
     bmi: 'Seu IMC é',
     status: 'Classificação',
     statuses: {
@@ -21,6 +28,11 @@ const textData = {
       obese: 'Obesidade',
     },
     error: 'Por favor, insira valores válidos.',
+    modalIdeal: 'O IMC ideal está na faixa de',
+    modalWarning: 'Como seu resultado está fora da faixa ideal, recomendamos procurar um profissional de saúde para maiores esclarecimentos.',
+    modalSuccess: 'Seu resultado está na faixa ideal. Parabéns!',
+    modalBase: 'Lembre-se que o IMC é apenas uma estimativa.',
+    okButton: 'OK, Entendi'
   },
   en: {
     title: 'BMI Calculator',
@@ -30,7 +42,7 @@ const textData = {
     metric: 'Metric',
     imperial: 'Imperial',
     language: 'Language',
-    resultTitle: 'Your Result:',
+    resultTitle: 'Your Result',
     bmi: 'Your BMI is',
     status: 'Classification',
     statuses: {
@@ -40,6 +52,11 @@ const textData = {
       obese: 'Obese',
     },
     error: 'Please enter valid values.',
+    modalIdeal: 'The ideal BMI is in the range of',
+    modalWarning: 'As your result is outside the ideal range, we recommend consulting a health professional for further clarification.',
+    modalSuccess: 'Your result is in the ideal range. Congratulations!',
+    modalBase: 'Remember that BMI is only an estimate.',
+    okButton: 'OK, Got it'
   },
 };
 
@@ -50,14 +67,17 @@ function App() {
   const [language, setLanguage] = useState('pt');
   const [bmiResult, setBmiResult] = useState(null);
   const [error, setError] = useState('');
+  
+  // NOVO ESTADO para controlar o modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const texts = useMemo(() => textData[language], [language]);
 
   const getBmiStatus = (bmi) => {
-    if (bmi < 18.5) return { text: texts.statuses.underweight, color: 'text-sky-400' };
-    if (bmi < 24.9) return { text: texts.statuses.normal, color: 'text-green-400' };
-    if (bmi < 29.9) return { text: texts.statuses.overweight, color: 'text-yellow-400' };
-    return { text: texts.statuses.obese, color: 'text-red-400' };
+    if (bmi < 18.5) return { text: texts.statuses.underweight, color: 'text-theme-gold' };
+    if (bmi < 24.9) return { text: texts.statuses.normal, color: 'text-theme-light-green' };
+    if (bmi < 29.9) return { text: texts.statuses.overweight, color: 'text-theme-gold' };
+    return { text: texts.statuses.obese, color: 'text-theme-orange' };
   };
 
   const handleCalculate = () => {
@@ -82,76 +102,168 @@ function App() {
     
     const status = getBmiStatus(bmi);
     setBmiResult({ value: bmi.toFixed(2), status });
+    
+    // MUDANÇA AQUI: Abrir o modal em vez de mostrar o resultado no card
+    setIsModalOpen(true);
+  };
+
+  // NOVA FUNÇÃO para fechar o modal e resetar tudo
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setWeight('');
+    setHeight('');
+    setBmiResult(null);
+    setError('');
   };
 
   const weightUnit = unit === 'metric' ? '(kg)' : '(lbs)';
   const heightUnit = unit === 'metric' ? '(cm)' : '(in)';
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 font-sans">
-      {/* Card principal com efeito de vidro fosco */}
-      <div className="w-full max-w-md bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl shadow-2xl p-8">
+    // Div principal. O `relative` é importante para o modal
+    <div className="min-h-screen bg-theme-dark text-white flex flex-col items-center justify-center p-4 font-sans relative">
+      
+      <div className="w-full max-w-md bg-gray-900 rounded-xl shadow-2xl p-8">
         
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-100 tracking-wider">{texts.title}</h1>
+          <h1 className="text-3xl font-bold text-theme-teal tracking-wider">{texts.title}</h1>
           <div className="flex items-center space-x-2">
-            <button onClick={() => setLanguage('pt')} className={`px-3 py-1 text-sm rounded-md transition-colors ${language === 'pt' ? 'bg-sky-500 text-white' : 'bg-slate-700 hover:bg-slate-600'}`}>PT</button>
-            <button onClick={() => setLanguage('en')} className={`px-3 py-1 text-sm rounded-md transition-colors ${language === 'en' ? 'bg-sky-500 text-white' : 'bg-slate-700 hover:bg-slate-600'}`}>EN</button>
+            <button 
+              onClick={() => setLanguage('pt')} 
+              className={`px-3 py-1 text-sm rounded-md transition-colors font-medium border ${
+                language === 'pt' 
+                ? 'bg-theme-teal text-white border-theme-teal' 
+                : 'bg-transparent text-theme-teal border-theme-teal/50 hover:bg-theme-teal/20'
+              }`}
+            >
+              PT
+            </button>
+            <button 
+              onClick={() => setLanguage('en')} 
+              className={`px-3 py-1 text-sm rounded-md transition-colors font-medium border ${
+                language === 'en' 
+                ? 'bg-theme-teal text-white border-theme-teal' 
+                : 'bg-transparent text-theme-teal border-theme-teal/50 hover:bg-theme-teal/20'
+              }`}
+            >
+              EN
+            </button>
           </div>
         </div>
 
-        <div className="flex justify-center items-center bg-slate-900/50 rounded-lg p-1 mb-8">
-          <button onClick={() => setUnit('metric')} className={`w-1/2 py-2 rounded-md transition-colors font-medium ${unit === 'metric' ? 'bg-sky-500/80' : 'hover:bg-slate-700/50'}`}>
+        <div className="flex justify-center items-center rounded-lg p-1 mb-8 space-x-2">
+          <button 
+            onClick={() => setUnit('metric')} 
+            className={`w-1/2 py-2 rounded-md transition-colors font-medium border ${
+              unit === 'metric' 
+              ? 'bg-theme-gold text-theme-dark border-theme-gold' 
+              : 'bg-transparent text-theme-gold border-theme-gold/50 hover:bg-theme-gold/20'
+            }`}
+          >
             {texts.metric}
           </button>
-          <button onClick={() => setUnit('imperial')} className={`w-1/2 py-2 rounded-md transition-colors font-medium ${unit === 'imperial' ? 'bg-sky-500/80' : 'hover:bg-slate-700/50'}`}>
+          <button 
+            onClick={() => setUnit('imperial')} 
+            className={`w-1/2 py-2 rounded-md transition-colors font-medium border ${
+              unit === 'imperial' 
+              ? 'bg-theme-gold text-theme-dark border-theme-gold' 
+              : 'bg-transparent text-theme-gold border-theme-gold/50 hover:bg-theme-gold/20'
+            }`}
+          >
             {texts.imperial}
           </button>
         </div>
         
         <div className="space-y-6">
           <div>
-            <label className="block text-slate-400 mb-2 font-medium">{`${texts.weightLabel} ${weightUnit}`}</label>
+            <label className="block text-theme-light-green mb-2 font-medium">{`${texts.weightLabel} ${weightUnit}`}</label>
             <input 
               type="number"
               placeholder='Ex: 70'
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-teal transition-all text-white"
             />
           </div>
-
           <div>
-            <label className="block text-slate-400 mb-2 font-medium">{`${texts.heightLabel} ${heightUnit}`}</label>
+            <label className="block text-theme-light-green mb-2 font-medium">{`${texts.heightLabel} ${heightUnit}`}</label>
             <input 
               type="number"
               placeholder='Ex: 175'
               value={height}
               onChange={(e) => setHeight(e.target.value)}
-              className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-theme-teal transition-all text-white"
             />
           </div>
         </div>
         
         <button
           onClick={handleCalculate}
-          className="w-full mt-8 bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-lg text-lg transform hover:scale-105 transition-all duration-300"
+          className="w-full mt-8 bg-theme-teal hover:bg-theme-teal/80 text-white font-bold py-3 rounded-lg text-lg transform hover:scale-105 transition-all duration-300"
         >
           {texts.calculateButton}
         </button>
 
+        {/* Mensagem de erro (ainda aparece no card) */}
         {error && <p className="text-red-400 text-center mt-6">{error}</p>}
 
-        {bmiResult && (
-          <div className="mt-8 p-6 bg-slate-900/50 border border-slate-700 rounded-lg text-center">
-            <h2 className="text-lg font-semibold text-slate-300 mb-2">{texts.resultTitle}</h2>
-            <p className="text-5xl font-bold text-sky-400 mb-3">{bmiResult.value}</p>
-            <p className="text-xl">
+        {/* MUDANÇA AQUI:
+          O bloco de resultado do IMC foi REMOVIDO daqui.
+          Ele agora existe apenas dentro do modal.
+        */}
+      </div>
+
+      {/* NOVO BLOCO: O MODAL DE AVISO 
+        Renderizado condicionalmente com base no 'isModalOpen'
+      */}
+      {isModalOpen && bmiResult && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-10">
+          
+          {/* Card do Modal */}
+          <div className="w-full max-w-sm bg-gray-900 rounded-xl shadow-2xl p-6 text-center border border-gray-700">
+            
+            <h3 className="text-2xl font-bold text-theme-teal mb-4">{texts.resultTitle}</h3>
+            
+            {/* O Resultado */}
+            <p className="text-gray-300 text-lg">{texts.bmi}:</p>
+            <p className="text-6xl font-bold text-theme-teal my-2">{bmiResult.value}</p>
+            <p className="text-xl mb-6">
               {texts.status}: <span className={`font-semibold ${bmiResult.status.color}`}>{bmiResult.status.text}</span>
             </p>
+
+            {/* Linha Divisória */}
+            <hr className="border-gray-700 mb-6" />
+
+            {/* Mensagem Genérica */}
+            <p className="text-sm text-gray-400 mb-4">
+              {texts.modalIdeal} <strong>18.5</strong> a <strong>24.9</strong>.
+            </p>
+            <p className="text-sm text-gray-300 mb-6">
+              {texts.modalBase}
+              
+              {/* Mensagem Condicional de Saúde */}
+              {(parseFloat(bmiResult.value) < 18.5 || parseFloat(bmiResult.value) >= 25) ? (
+                <span className="text-theme-gold font-semibold block mt-2">
+                  {texts.modalWarning}
+                </span>
+              ) : (
+                <span className="text-theme-light-green font-semibold block mt-2">
+                  {texts.modalSuccess}
+                </span>
+              )}
+            </p>
+
+            {/* Botão de Fechar e Resetar */}
+            <button
+              onClick={handleCloseModal}
+              className="w-full bg-theme-teal hover:bg-theme-teal/80 text-white font-bold py-3 rounded-lg text-lg transition-colors"
+            >
+              {texts.okButton}
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      
     </div>
   );
 }
